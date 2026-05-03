@@ -1,1 +1,2 @@
-pip install groq instructor python-dotenv
+groq instructor python-dotenv
+pdfplumber

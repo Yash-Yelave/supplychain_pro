@@ -1,4 +1,5 @@
 import os
+from typing import Optional # <--- Add this line!
 from dotenv import load_dotenv
 import instructor
 from groq import Groq
@@ -14,7 +15,7 @@ load_dotenv()
 # This gives the client the "response_model" capability
 client = instructor.from_groq(Groq(api_key=os.getenv("GROQ_API_KEY")))
 
-def extract_quotation(raw_text: str) -> Quotation:
+def extract_quotation(raw_text: str, supplier_id: str = "UNKNOWN") -> Optional[Quotation]:
     """
     Takes raw, unstructured text from an email or document and 
     forces the Groq LLM to output a perfectly structured Quotation object.
