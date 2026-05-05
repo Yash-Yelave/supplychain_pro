@@ -1,0 +1,278 @@
+from sqlalchemy import select
+
+from app.db.session import SessionLocal
+from app.models.supplier import Supplier
+
+
+SUPPLIERS = [
+    {
+        "name": "Shree BuildMat Traders",
+        "email": "quotes@shreebuildmat.in",
+        "location": "Mumbai, Maharashtra",
+        "material_categories": ["cement", "concrete", "aggregates"],
+        "simulated_response_hours": 4,
+        "referral_count": 12,
+        "simulated_reply_template": "We can quote OPC/PPC cement per MT with freight included for Mumbai metro deliveries.",
+    },
+    {
+        "name": "Apex TMT Steel Supply",
+        "email": "sales@apextmt.in",
+        "location": "Pune, Maharashtra",
+        "material_categories": ["steel", "rebar", "tmt"],
+        "simulated_response_hours": 8,
+        "referral_count": 18,
+        "simulated_reply_template": "Current TMT rates are quoted per metric ton, ex-yard or delivered based on site distance.",
+    },
+    {
+        "name": "RCC ReadyMix Solutions",
+        "email": "commercial@rccreadymix.co.in",
+        "location": "Nashik, Maharashtra",
+        "material_categories": ["concrete", "rmc", "admixtures"],
+        "simulated_response_hours": 6,
+        "referral_count": 10,
+        "simulated_reply_template": "We supply M20 to M40 RMC with pump charges and slump requirements listed separately.",
+    },
+    {
+        "name": "Western Aggregates Co.",
+        "email": "dispatch@westernaggregates.in",
+        "location": "Surat, Gujarat",
+        "material_categories": ["aggregates", "sand", "crushed stone"],
+        "simulated_response_hours": 12,
+        "referral_count": 7,
+        "simulated_reply_template": "Rates vary by aggregate size and lead distance; minimum dispatch is one full truckload.",
+    },
+    {
+        "name": "Prime Cement Distributors",
+        "email": "orders@primecementdist.com",
+        "location": "Ahmedabad, Gujarat",
+        "material_categories": ["cement", "fly ash"],
+        "simulated_response_hours": 10,
+        "referral_count": 15,
+        "simulated_reply_template": "We quote bagged cement and bulk cement separately, with GST and unloading terms mentioned.",
+    },
+    {
+        "name": "Indus Structural Steel",
+        "email": "estimations@indusstructural.in",
+        "location": "Nagpur, Maharashtra",
+        "material_categories": ["steel", "structural steel", "plates"],
+        "simulated_response_hours": 18,
+        "referral_count": 9,
+        "simulated_reply_template": "Please confirm grade and section sizes; pricing is per kg with fabrication excluded unless requested.",
+    },
+    {
+        "name": "Metro Formwork Materials",
+        "email": "supply@metroformwork.in",
+        "location": "Thane, Maharashtra",
+        "material_categories": ["formwork", "plywood", "shuttering"],
+        "simulated_response_hours": 16,
+        "referral_count": 5,
+        "simulated_reply_template": "We offer film-faced shuttering plywood and accessories with slab-wise delivery options.",
+    },
+    {
+        "name": "Narmada Sand & Minerals",
+        "email": "quotes@narmadasand.in",
+        "location": "Bharuch, Gujarat",
+        "material_categories": ["sand", "m-sand", "aggregates"],
+        "simulated_response_hours": 9,
+        "referral_count": 11,
+        "simulated_reply_template": "M-sand and washed sand quotes include moisture variance and weighbridge slips.",
+    },
+    {
+        "name": "Evergreen Plumbing Supply",
+        "email": "sales@evergreenplumbing.in",
+        "location": "Bengaluru, Karnataka",
+        "material_categories": ["pipes", "cpvc", "pvc", "plumbing"],
+        "simulated_response_hours": 20,
+        "referral_count": 6,
+        "simulated_reply_template": "Pipe pricing is shared brand-wise with MOQ by diameter and delivery in bundles.",
+    },
+    {
+        "name": "Dakshin Electrical Wholesale",
+        "email": "tenders@dakshinelectrical.in",
+        "location": "Chennai, Tamil Nadu",
+        "material_categories": ["electrical", "cables", "switchgear"],
+        "simulated_response_hours": 14,
+        "referral_count": 14,
+        "simulated_reply_template": "Cable and switchgear quotes include make, warranty, GST, and validity by brand.",
+    },
+    {
+        "name": "Northstar Cement Agency",
+        "email": "northstarcement@example.com",
+        "location": "Delhi NCR",
+        "material_categories": ["cement", "white cement"],
+        "simulated_response_hours": 24,
+        "referral_count": 4,
+        "simulated_reply_template": "We can supply OPC 43/53 and white cement; rates change weekly based on depot availability.",
+    },
+    {
+        "name": "Bharat Rebar Depot",
+        "email": "quotes@bharatrebar.in",
+        "location": "Hyderabad, Telangana",
+        "material_categories": ["steel", "rebar", "binding wire"],
+        "simulated_response_hours": 7,
+        "referral_count": 13,
+        "simulated_reply_template": "TMT bar rates are diameter-wise with rolling tolerance and mill test certificates available.",
+    },
+    {
+        "name": "Konkan Blocks & Bricks",
+        "email": "sales@konkanblocks.in",
+        "location": "Ratnagiri, Maharashtra",
+        "material_categories": ["bricks", "blocks", "aac blocks"],
+        "simulated_response_hours": 15,
+        "referral_count": 8,
+        "simulated_reply_template": "AAC block rates are per cubic meter and red brick rates are per thousand pieces.",
+    },
+    {
+        "name": "Urban Tiles & Flooring",
+        "email": "projects@urbantiles.in",
+        "location": "Jaipur, Rajasthan",
+        "material_categories": ["tiles", "flooring", "stone"],
+        "simulated_response_hours": 30,
+        "referral_count": 3,
+        "simulated_reply_template": "Please share tile size and finish; project rates include packing and breakage policy.",
+    },
+    {
+        "name": "BuildChem Admixtures",
+        "email": "technical@buildchem.in",
+        "location": "Vadodara, Gujarat",
+        "material_categories": ["admixtures", "waterproofing", "chemicals"],
+        "simulated_response_hours": 5,
+        "referral_count": 16,
+        "simulated_reply_template": "We quote admixtures per kg/litre with dosage recommendations and technical datasheets.",
+    },
+    {
+        "name": "Sahyadri Roofing Systems",
+        "email": "sales@sahyadriroofing.in",
+        "location": "Kolhapur, Maharashtra",
+        "material_categories": ["roofing", "sheets", "purlins"],
+        "simulated_response_hours": 22,
+        "referral_count": 6,
+        "simulated_reply_template": "Roofing sheet pricing depends on thickness, coating, color, and accessories required.",
+    },
+    {
+        "name": "Reliable Paints Project Supply",
+        "email": "b2b@reliablepaints.in",
+        "location": "Indore, Madhya Pradesh",
+        "material_categories": ["paint", "primer", "putty"],
+        "simulated_response_hours": 11,
+        "referral_count": 9,
+        "simulated_reply_template": "Paint quotes include brand, coverage, pack size, shade dependency, and payment terms.",
+    },
+    {
+        "name": "Coastal Glass & Facade",
+        "email": "estimating@coastalfacade.in",
+        "location": "Kochi, Kerala",
+        "material_categories": ["glass", "facade", "aluminium"],
+        "simulated_response_hours": 28,
+        "referral_count": 5,
+        "simulated_reply_template": "Facade and glass quotes require drawings; rates are separated for material and installation.",
+    },
+    {
+        "name": "Unity Hardware Mart",
+        "email": "quotes@unityhardware.in",
+        "location": "Lucknow, Uttar Pradesh",
+        "material_categories": ["hardware", "fasteners", "tools"],
+        "simulated_response_hours": 19,
+        "referral_count": 7,
+        "simulated_reply_template": "Fastener rates are box-wise with grade, coating, and brand availability specified.",
+    },
+    {
+        "name": "Eastern Concrete Products",
+        "email": "sales@easternconcrete.in",
+        "location": "Kolkata, West Bengal",
+        "material_categories": ["concrete", "precast", "pavers"],
+        "simulated_response_hours": 13,
+        "referral_count": 10,
+        "simulated_reply_template": "Precast and paver quotes include mould type, compressive strength, and transport terms.",
+    },
+    {
+        "name": "Deccan Bitumen Traders",
+        "email": "commercial@deccanbitumen.in",
+        "location": "Aurangabad, Maharashtra",
+        "material_categories": ["bitumen", "asphalt", "road materials"],
+        "simulated_response_hours": 17,
+        "referral_count": 4,
+        "simulated_reply_template": "Bitumen pricing follows refinery-linked rates with tanker MOQ and temperature handling notes.",
+    },
+    {
+        "name": "GreenGrid Solar & Electrical",
+        "email": "projects@greengrid.in",
+        "location": "Coimbatore, Tamil Nadu",
+        "material_categories": ["electrical", "solar", "cables"],
+        "simulated_response_hours": 21,
+        "referral_count": 8,
+        "simulated_reply_template": "Solar and electrical material quotes list make, warranty, certification, and delivery timeline.",
+    },
+    {
+        "name": "Himalaya Timber Depot",
+        "email": "orders@himalayatimber.in",
+        "location": "Dehradun, Uttarakhand",
+        "material_categories": ["timber", "plywood", "doors"],
+        "simulated_response_hours": 26,
+        "referral_count": 5,
+        "simulated_reply_template": "Timber rates depend on species, seasoning, thickness, and current stock availability.",
+    },
+    {
+        "name": "Mahalaxmi Waterproofing Supply",
+        "email": "sales@mahalaxmiwaterproofing.in",
+        "location": "Vapi, Gujarat",
+        "material_categories": ["waterproofing", "membranes", "chemicals"],
+        "simulated_response_hours": 6,
+        "referral_count": 12,
+        "simulated_reply_template": "Membrane and coating quotes include application coverage, primer needs, and warranty options.",
+    },
+    {
+        "name": "Zenith Safety Equipment",
+        "email": "bulk@zenithsafety.in",
+        "location": "Gurugram, Haryana",
+        "material_categories": ["safety", "ppe", "site equipment"],
+        "simulated_response_hours": 10,
+        "referral_count": 9,
+        "simulated_reply_template": "PPE quotes are item-wise with IS certification, pack size, and bulk discount slabs.",
+    },
+    {
+        "name": "Omkar Heavy Equipment Rentals",
+        "email": "rentals@omkarheavy.in",
+        "location": "Raipur, Chhattisgarh",
+        "material_categories": ["equipment", "scaffolding", "formwork"],
+        "simulated_response_hours": 32,
+        "referral_count": 6,
+        "simulated_reply_template": "Rental quotes include mobilization, monthly rate, operator cost, and security deposit.",
+    },
+    {
+        "name": "Kaveri Blocks Industries",
+        "email": "dispatch@kaveriblocks.in",
+        "location": "Mysuru, Karnataka",
+        "material_categories": ["blocks", "aac blocks", "pavers"],
+        "simulated_response_hours": 9,
+        "referral_count": 11,
+        "simulated_reply_template": "Block supply rates include palletization, truckload MOQ, and delivery slots by zone.",
+    },
+    {
+        "name": "Sterling MEP Materials",
+        "email": "mep@sterlingmaterials.in",
+        "location": "Noida, Uttar Pradesh",
+        "material_categories": ["mep", "hvac", "pipes", "electrical"],
+        "simulated_response_hours": 18,
+        "referral_count": 7,
+        "simulated_reply_template": "MEP material quotes are BOQ-based with brand alternatives and separate tax columns.",
+    },
+]
+
+
+def seed_suppliers() -> int:
+    inserted_count = 0
+    with SessionLocal() as db:
+        existing_emails = set(db.scalars(select(Supplier.email)).all())
+        for supplier_data in SUPPLIERS:
+            if supplier_data["email"] in existing_emails:
+                continue
+            db.add(Supplier(**supplier_data))
+            inserted_count += 1
+        db.commit()
+    return inserted_count
+
+
+if __name__ == "__main__":
+    count = seed_suppliers()
+    print(f"Inserted {count} suppliers.")
