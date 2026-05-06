@@ -21,6 +21,7 @@ class Quotation(Base):
     delivery_days: Mapped[int | None] = mapped_column(Integer)
     validity_days: Mapped[int | None] = mapped_column(Integer)
     payment_terms: Mapped[str | None] = mapped_column(String(255))
+    notes: Mapped[str | None] = mapped_column(Text)
     extraction_confidence: Mapped[Decimal | None] = mapped_column(Numeric(5, 4))
     missing_fields: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
     raw_text: Mapped[str | None] = mapped_column(Text)

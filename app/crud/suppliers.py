@@ -17,6 +17,8 @@ def list_all_suppliers(db: Session | None = None) -> list[Supplier]:
             db.close()
 
 
+
+
 def get_supplier_by_id(supplier_id: uuid.UUID | str, db: Session | None = None) -> Supplier | None:
     owns_session = db is None
     db = db or SessionLocal()

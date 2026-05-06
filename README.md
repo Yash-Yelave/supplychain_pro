@@ -26,22 +26,50 @@ Replace `YOUR-PASSWORD` with the Supabase database password. If your network can
 
 ## Database
 
-Run migrations:
+Run migrations (creates/updates database tables via Alembic):
 
 ```powershell
 alembic upgrade head
 ```
 
-Seed suppliers:
+Database docs:
+
+- Narrative: `docs/database.md`
+- Generated schema snapshot: `docs/database_schema.md` (regenerate from SQLAlchemy models with `python -m scripts.gen_db_docs`)
+
+Regenerate schema snapshot (writes `docs/database_schema.md`):
+
+```powershell
+python -m scripts.gen_db_docs
+```
+
+Seed suppliers (inserts demo supplier rows used by simulations/tests):
 
 ```powershell
 python -m scripts.seed_suppliers
 ```
 
-Validate connection, tables, seed data, and category query:
+Validate connection, tables, seed data, and category query (quick DB health check):
 
 ```powershell
 python -m scripts.check_database
+```
+
+## Extraction (Day 2+)
+
+Environment:
+
+```env
+DEEPSEEK_API_KEY=...
+DEEPSEEK_BASE_URL=https://api.deepseek.com
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+Run the lightweight extraction demo (uses seeded suppliers; creates a temporary procurement request):
+
+```powershell
+python -m scripts.test_extraction --material cement
+python -m scripts.test_extraction --material cement --persist
 ```
 
 ## Query Examples
@@ -83,4 +111,3 @@ scripts/
   check_database.py
   verify_database.py
 ```
-
