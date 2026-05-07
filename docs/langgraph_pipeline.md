@@ -37,6 +37,12 @@ Validate DB connectivity + expected tables:
 venv\Scripts\python -m scripts.check_database
 ```
 
+If you are using Supabase Session Pooler, consider disabling client-side pooling:
+
+```powershell
+$env:DB_DISABLE_POOLING=1
+```
+
 ## Run Pipeline
 
 Sequential runner (no LangGraph dependency):

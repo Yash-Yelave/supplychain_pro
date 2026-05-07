@@ -35,11 +35,13 @@ DATABASE_URL=postgresql+psycopg://postgres:YOUR-PASSWORD@YOUR-HOST:5432/postgres
 DB_POOL_SIZE=1
 DB_MAX_OVERFLOW=0
 DB_POOL_TIMEOUT_S=30
+DB_DISABLE_POOLING=0
 ```
 
 Notes:
 - If your password contains special characters, URL-encode them (example: `@` → `%40`).
 - If you cannot connect to Supabase direct host (common on some networks/IPv6 paths), use Supabase **Session Pooler** host/port and keep the `postgresql+psycopg://` prefix.
+- When using the Supabase Session Pooler, you can set `DB_DISABLE_POOLING=1` to avoid holding connections on the client side (the pooler already multiplexes connections).
 
 ## 3) How the Extraction Pipeline Works
 
