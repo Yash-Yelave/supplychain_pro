@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from datetime import date, timedelta
+import json
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import select
@@ -49,6 +50,8 @@ def main() -> int:
         print("Missing DEEPSEEK_API_KEY. Set it in .env to run real DeepSeek validation.")
         return 2
 
+    os.environ.setdefault("DEEPSEEK_DEBUG", "1")
+
     llm = DeepSeekChatClient()
     extractor = QuotationExtractor(llm=llm)
 
@@ -84,6 +87,7 @@ def main() -> int:
             print("RAW:\n", raw)
 
             result = extractor.extract(raw_text=raw, supplier_hint=None, material_hint="cement")
+            print("CLEANED_JSON:", json.dumps(result.extracted.model_dump(), indent=2, default=str))
             print("EXTRACTED:", result.extracted.model_dump())
             print("CONFIDENCE:", result.extraction_confidence)
             print("MISSING:", result.missing_fields)

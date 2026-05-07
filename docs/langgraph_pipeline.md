@@ -67,7 +67,10 @@ Each successful run should persist:
   - Use Supabase Session Pooler connection details for `DATABASE_URL` (keep the `postgresql+psycopg://` prefix).
   - The helper `venv\Scripts\python -m scripts.verify_database` prints more connection diagnostics.
 
+- If `scripts.validate_deepseek_extraction` shows DeepSeek request failures:
+  - Enable `DEEPSEEK_DEBUG=1` to see the exact exception and raw response previews (when available).
+  - `WinError 10013` indicates outbound HTTPS from Python is blocked on the machine/network.
+
 - The pipeline prints:
   - State transitions from `state.logs`
   - DB counts for `quotations`, `trust_scores`, and `reports`
-

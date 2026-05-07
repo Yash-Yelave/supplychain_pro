@@ -122,6 +122,21 @@ Runs 5 cases and prints:
 venv\Scripts\python -m scripts.validate_deepseek_extraction
 ```
 
+### C) DeepSeek debug mode
+
+Enable debug logging (prints raw response content previews + request errors):
+
+```powershell
+$env:DEEPSEEK_DEBUG=1
+venv\Scripts\python -m scripts.validate_deepseek_extraction
+```
+
+If you see `WinError 10013` (socket access forbidden), your machine/network is blocking outbound HTTPS requests from Python. Allow outbound access for Python (or run on a different network/VPN) to validate real DeepSeek calls.
+
+### D) Token-saving local fallback (regex pre-extraction)
+
+The extraction pipeline runs a lightweight local regex pass (currency/unit price, MOQ, delivery, validity) before calling the LLM, and uses it as a fallback if the LLM fails. This reduces DeepSeek token usage and prevents DB persistence from being blocked when obvious fields are present.
+
 ## 5) Example Workflow
 
 1) You receive a supplier message like:
@@ -172,4 +187,3 @@ How unnecessary usage is avoided:
 - Truncation of long raw text before LLM calls.
 - Quick local reject for non-quotation text.
 - Deterministic settings (`temperature=0`) to reduce variance and retries.
-

@@ -5,6 +5,7 @@ import os
 import random
 import time
 from dataclasses import dataclass
+import sys
 
 import httpx
 
@@ -63,6 +64,7 @@ class DeepSeekChatClient:
         temperature: float = 0.0,
         max_tokens: int = 256,
     ) -> dict:
+        debug = bool(os.getenv("DEEPSEEK_DEBUG", "").strip())
         payload = {
             "model": self._config.model,
             "temperature": temperature,
@@ -74,6 +76,7 @@ class DeepSeekChatClient:
         }
 
         last_exc: Exception | None = None
+        last_content: str | None = None
         for attempt in range(self._config.max_retries + 1):
             try:
                 resp = self._client.post("/chat/completions", json=payload)
@@ -82,9 +85,18 @@ class DeepSeekChatClient:
                 resp.raise_for_status()
                 data = resp.json()
                 content = data["choices"][0]["message"]["content"]
+                last_content = content
+                if debug:
+                    preview = content if len(content) <= 900 else (content[:900] + "...[truncated]")
+                    print("[deepseek][raw_content]", preview, file=sys.stderr)
                 return _load_json_strict(content)
             except (httpx.TimeoutException, httpx.NetworkError, httpx.HTTPStatusError, KeyError, ValueError) as exc:
                 last_exc = exc
+                if debug:
+                    print(f"[deepseek][debug] attempt={attempt} error={type(exc).__name__}: {exc}", file=sys.stderr)
+                    if last_content:
+                        preview = last_content if len(last_content) <= 900 else (last_content[:900] + "...[truncated]")
+                        print("[deepseek][debug] last_content_preview:", preview, file=sys.stderr)
                 if attempt >= self._config.max_retries:
                     break
                 backoff = (0.4 * (2**attempt)) + random.random() * 0.2
