@@ -1,5 +1,76 @@
 # Work Log
 
+## 2026-05-08 - FastAPI Backend Layer + API/Pipeline Integration
+
+### Summary (what changed)
+- Implemented FastAPI backend entrypoint and API structure for procurement lifecycle:
+  - `app/main.py`
+  - `app/api/router.py`
+  - `app/api/routes/procurement.py`
+  - `app/schemas/procurement.py`
+  - `app/services/procurement_service.py`
+  - `app/middleware/error_handlers.py`
+  - `app/dependencies/db.py`
+- Added procurement API endpoints:
+  - `POST /procurement/request`
+  - `GET /procurement/{request_id}/status`
+  - `GET /procurement/{request_id}/results`
+- Integrated existing multi-agent pipeline into API flow using FastAPI background tasks.
+- Added continuation pipeline runners for existing request IDs (so API-created requests can run agents without re-running supervisor):
+  - `run_sequential_from_existing_request(...)`
+  - `run_langgraph_from_existing_request(...)`
+- Added config for orchestration mode selection:
+  - `PIPELINE_USE_LANGGRAPH` (default `false`)
+- Updated requirements with API/testing dependencies:
+  - `fastapi`, `uvicorn`, `requests`
+- Added API docs and validation artifacts:
+  - `docs/api_overview.md`
+  - `docs/api_usage.md`
+  - `docs/backend_validation_report.md`
+  - `scripts/test_api_flow.py`
+
+### Runtime issues found and fixed
+- **QueuePool timeout during background execution** with Supabase-friendly pool (`pool_size=1`, `max_overflow=0`):
+  - Root cause: request-scoped session/connection lifecycle clashed with background task DB session demand.
+  - Fix: route handlers now use explicit short-lived `SessionLocal()` usage with immediate close; creation route commits and releases promptly before background work progresses.
+- **`RuntimeError: Caught handled exception, but response already started`**:
+  - Root cause: exception re-raised from background task after response start.
+  - Fix: pipeline background failures are persisted as `failed` status and not re-raised to ASGI stack.
+- **500 on `POST /procurement/request` after session close**:
+  - Root cause: reading ORM attributes from detached/expired instance after closing DB session.
+  - Fix: copy response fields (`request_id`, `status`, `current_agent`) before closing session.
+
+### What was validated
+- FastAPI server boots successfully with reload.
+- `POST /procurement/request` returns `202 Accepted` and enqueues pipeline.
+- Python compile checks passed for new API/service modules.
+- End-to-end API lifecycle script (`scripts/test_api_flow.py`) is available for local validation.
+
+### How to use (copy/paste)
+
+1) Start server:
+```powershell
+venv\Scripts\Activate.ps1
+uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
+```
+
+2) Run API lifecycle validation in another terminal:
+```powershell
+venv\Scripts\Activate.ps1
+python -m scripts.test_api_flow --base-url http://127.0.0.1:8000
+```
+
+3) Manual status/results checks:
+```powershell
+curl http://127.0.0.1:8000/procurement/<REQUEST_ID>/status
+curl http://127.0.0.1:8000/procurement/<REQUEST_ID>/results
+```
+
+### Notes / gotchas
+- Keep `DB_POOL_SIZE=1` and `DB_MAX_OVERFLOW=0` for Supabase free tier; avoid long-lived request sessions that hold the only connection.
+- If DeepSeek key is missing/unavailable, extraction falls back to deterministic simulation/local extraction path.
+- LangGraph remains optional and controlled by `PIPELINE_USE_LANGGRAPH=true|false`.
+
 ## 2026-05-07 - LangGraph Procurement Pipeline + Extraction Reliability Fixes
 
 ### Summary (what changed)
