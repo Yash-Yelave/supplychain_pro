@@ -1,6 +1,50 @@
 # Work Log
 
-## 2026-05-06 — Extraction System (DeepSeek + Postgres)
+## 2026-05-07 - LangGraph Procurement Pipeline + Extraction Reliability Fixes
+
+### Summary (what changed)
+- Implemented MVP multi-agent procurement pipeline with optional LangGraph orchestration.
+- Added shared, JSON-serializable `ProcurementState` with explicit agent transition logs for debugging.
+- Added deterministic supplier trust scoring (configurable weights; no LLM scoring decisions).
+- Hardened quotation extraction to avoid "all None / confidence 0" when LLM calls fail:
+  - Added token-free local regex pre-extraction (currency/unit price, MOQ, delivery, validity) used before LLM calls and as fallback.
+  - Added `DEEPSEEK_DEBUG` debug mode to print request errors and raw model content previews (when available).
+- Added Supabase stability knob to disable client-side pooling when using Supabase Session Pooler (`DB_DISABLE_POOLING=1` -> `NullPool`).
+
+### What was validated
+- Extraction validation cases now populate required fields via local pre-extraction (so DB persistence is no longer blocked by missing `unit_price`/`currency` when the text contains them).
+- Real DeepSeek calls were NOT validated successfully in this environment due to outbound network restrictions:
+  - DeepSeek: `WinError 10013` (socket access forbidden) during HTTPS calls.
+  - Supabase: direct DB connectivity fails to IPv6 host on port 5432 with permission denied.
+
+### How to use (copy/paste)
+
+1) Validate DB connectivity:
+```powershell
+venv\Scripts\python -m scripts.verify_database
+venv\Scripts\python -m scripts.check_database
+```
+
+2) Validate DeepSeek extraction (with debug logs):
+```powershell
+$env:DEEPSEEK_DEBUG=1
+venv\Scripts\python -m scripts.validate_deepseek_extraction
+```
+
+3) Run full procurement pipeline:
+```powershell
+venv\Scripts\python -m scripts.run_procurement_pipeline --material cement
+venv\Scripts\python -m scripts.run_procurement_pipeline --material cement --langgraph
+```
+
+### Notes / gotchas
+- If DeepSeek requests fail with `WinError 10013`, allow outbound HTTPS for Python on your machine/network (or use a network/VPN that permits it) to validate real DeepSeek extraction end-to-end.
+- If Supabase direct host fails (often IPv6/port blocked), switch `DATABASE_URL` to Supabase Session Pooler host/port and consider disabling client-side pooling:
+```powershell
+$env:DB_DISABLE_POOLING=1
+```
+
+## 2026-05-06 - Extraction System (DeepSeek + Postgres)
 
 ### Summary (what changed)
 - Implemented the extraction module skeleton under `app/extraction/` (schemas, prompts, services, validators, pipeline, simulation).
@@ -59,6 +103,56 @@ venv\Scripts\python -m scripts.validate_deepseek_extraction
 
 ### Notes / gotchas
 - If you see `Missing DEEPSEEK_API_KEY`, ensure `.env` has `DEEPSEEK_API_KEY=...` and you run via `venv\Scripts\python ...` (the validation script loads `.env`).
-- If Supabase direct DB host fails (often IPv6/port blocked), switch `DATABASE_URL` to Supabase **Session Pooler** host/port.
+- If Supabase direct DB host fails (often IPv6/port blocked), switch `DATABASE_URL` to Supabase Session Pooler host/port.
 - Keep prompts short to preserve DeepSeek trial quota; prompt truncation is enabled in `app/extraction/prompts/quotation_prompt.py`.
 
+## 2026-05-05 — Backend Foundation (PostgreSQL + Supabase-compatible)
+
+Project: ConstructProcure AI (backend foundation)
+
+### Summary
+Day 1 backend foundation was created: PostgreSQL (Supabase-compatible) persistence with SQLAlchemy models, Alembic migrations, supplier seed data, and basic supplier query utilities. Repository was cleaned to remove the earlier Day 3 extraction prototype and other non-Day-1 artifacts.
+
+### Cleanup
+- Removed previous Groq/PDF extraction prototype code and Day 3 test scaffolding because agents/APIs/extraction are out of Day 1 scope.
+- Removed empty/placeholder directories and generated Python bytecode artifacts (`__pycache__`, `.pyc`) that were committed previously.
+- Replaced the previous secret-bearing `.env` contents with database placeholders and added `.env.example`.
+- Kept `docs/` and `data/` reference assets (planning PDFs, workflow image, etc.).
+
+### Backend foundation added
+- Environment/config
+  - `.python-version` set to `3.11` (note: local shell still uses Python 3.10; this file is the target runtime).
+  - `.env` + `.env.example` with Supabase-ready `DATABASE_URL`.
+  - `requirements.txt` pinned to minimal backend DB dependencies.
+  - `app/core/config.py` for env-based configuration.
+- Database wiring
+  - `app/db/base.py` Declarative base.
+  - `app/db/session.py` SQLAlchemy engine + `SessionLocal`.
+- Models (SQLAlchemy)
+  - `app/models/supplier.py`
+  - `app/models/procurement_request.py`
+  - `app/models/quotation.py`
+  - `app/models/trust_score.py`
+  - `app/models/report.py`
+- Migrations (Alembic)
+  - `alembic/` initialized with `alembic.ini`.
+  - First migration added: `alembic/versions/20260505_0001_create_foundation_tables.py`.
+- Seed + queries
+  - Seed script: `scripts/seed_suppliers.py` inserts ~30 realistic suppliers with varied categories/locations/templates.
+  - Query helpers: `app/crud/suppliers.py`
+    - `list_all_suppliers()`
+    - `get_supplier_by_id(id)`
+    - `get_suppliers_by_category(material_type)`
+  - Sanity check script: `scripts/check_database.py`
+
+### Documentation added
+- Schema documentation: `docs/database_schema.md` (tables, enums, constraints, indexes, relationships).
+- README updated with Day 1 scope and run instructions.
+
+### Database connection verification
+Added verifier script: `scripts/verify_database.py`.
+
+Observed result in this environment on 2026-05-05:
+- Connection failed with host parse/resolution error: host appeared as `1@db.yjntccgwhskykbbsigrr.supabase.co`.
+- Likely root cause: malformed `DATABASE_URL` (typically an unencoded special character in password, especially `@`).
+- Fix: ensure `DATABASE_URL` is `postgresql+psycopg://postgres:<URL-ENCODED_PASSWORD>@db...:5432/postgres`.

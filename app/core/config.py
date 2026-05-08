@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     db_max_overflow: int = 0
     db_pool_timeout_s: int = 30
     db_disable_pooling: bool = False
+    pipeline_use_langgraph: bool = False
     app_env: str = "development"
 
     model_config = SettingsConfigDict(
