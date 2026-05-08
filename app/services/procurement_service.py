@@ -71,7 +71,7 @@ def run_pipeline_for_request(*, request_id: uuid.UUID, payload: ProcurementReque
                 status=ProcurementRequestStatus.failed,
                 completed_at=datetime.now(timezone.utc),
             )
-            raise
+            return
 
 
 def get_status(*, db: Session, request_id: uuid.UUID) -> ProcurementStatusResponse:
