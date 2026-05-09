@@ -1,0 +1,97 @@
+import axios from 'axios';
+
+// Ensure the trailing slash is removed if provided
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
+export const apiClient = axios.create({
+  baseURL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+export interface ProcurementRequestCreate {
+  material_type: string;
+  quantity: number;
+  unit: string;
+  deadline: string; // YYYY-MM-DD
+}
+
+export interface ProcurementRequestCreateResponse {
+  request_id: string;
+  pipeline_status: string;
+  current_agent: string | null;
+}
+
+export interface ProcurementStatusResponse {
+  request_id: string;
+  pipeline_status: string;
+  current_agent: string | null;
+  supplier_count: number;
+  quotation_count: number;
+  trust_score_count: number;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface RankedSupplier {
+  rank: number;
+  supplier_id: string;
+  supplier_name: string;
+  location: string;
+  unit_price: number | null;
+  currency: string | null;
+  scores: Record<string, number>;
+}
+
+export interface TrustScoreRow {
+  supplier_id: string;
+  supplier_name: string | null;
+  composite_score: number;
+  price_competitiveness: number;
+  response_speed_score: number;
+  quote_completeness: number;
+  referral_score: number;
+  computed_at: string;
+}
+
+export interface ExtractedQuotationRow {
+  quotation_id: string;
+  supplier_id: string;
+  supplier_name: string | null;
+  unit_price: number;
+  currency: string;
+  moq: number | null;
+  delivery_days: number | null;
+  validity_days: number | null;
+  payment_terms: string | null;
+  notes: string | null;
+  extraction_confidence: number | null;
+  missing_fields: string[];
+  created_at: string;
+}
+
+export interface ProcurementResultsResponse {
+  request_id: string;
+  pipeline_status: string;
+  ranked_suppliers: RankedSupplier[];
+  trust_scores: TrustScoreRow[];
+  extracted_quotations: ExtractedQuotationRow[];
+  final_recommendation_report: string | null;
+  analyst_summary: string | null;
+}
+
+export const procurementApi = {
+  createRequest: async (data: ProcurementRequestCreate) => {
+    const response = await apiClient.post<ProcurementRequestCreateResponse>('/procurement/request', data);
+    return response.data;
+  },
+  getStatus: async (id: string) => {
+    const response = await apiClient.get<ProcurementStatusResponse>(`/procurement/${id}/status`);
+    return response.data;
+  },
+  getResults: async (id: string) => {
+    const response = await apiClient.get<ProcurementResultsResponse>(`/procurement/${id}/results`);
+    return response.data;
+  },
+};
