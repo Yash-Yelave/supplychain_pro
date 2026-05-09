@@ -11,15 +11,19 @@ const PIPELINE_STAGES = [
   'extraction',
   'scoring',
   'analysis',
-  'completed'
+  'complete'
 ];
 
 export default function StatusTracker({ status }: Props) {
   if (!status) return null;
 
-  const currentStatusIndex = PIPELINE_STAGES.indexOf(status.pipeline_status) !== -1 
-    ? PIPELINE_STAGES.indexOf(status.pipeline_status) 
-    : 0;
+  let currentStatusIndex = 0;
+  if (status.pipeline_status === 'complete' || status.pipeline_status === 'completed') {
+    currentStatusIndex = PIPELINE_STAGES.length - 1;
+  } else if (status.pipeline_status === 'in_progress') {
+    const agentIndex = PIPELINE_STAGES.indexOf(status.current_agent || '');
+    currentStatusIndex = agentIndex !== -1 ? agentIndex : 1;
+  }
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
@@ -44,8 +48,8 @@ export default function StatusTracker({ status }: Props) {
         <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200 md:hidden"></div>
         <div className="flex flex-col md:flex-row justify-between relative z-10 space-y-4 md:space-y-0">
           {PIPELINE_STAGES.map((stage, index) => {
-            const isCompleted = index < currentStatusIndex || status.pipeline_status === 'completed';
-            const isActive = index === currentStatusIndex && status.pipeline_status !== 'completed';
+            const isCompleted = index < currentStatusIndex || status.pipeline_status === 'complete' || status.pipeline_status === 'completed';
+            const isActive = index === currentStatusIndex && status.pipeline_status !== 'complete' && status.pipeline_status !== 'completed';
             const isPending = index > currentStatusIndex;
 
             return (

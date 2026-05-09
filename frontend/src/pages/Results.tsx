@@ -20,7 +20,7 @@ export default function Results() {
       const statusData = await procurementApi.getStatus(requestId);
       setStatus(statusData);
 
-      if (statusData.pipeline_status === 'completed' || statusData.pipeline_status === 'failed') {
+      if (statusData.pipeline_status === 'complete' || statusData.pipeline_status === 'completed' || statusData.pipeline_status === 'failed') {
         setIsPolling(false);
         const resultsData = await procurementApi.getResults(requestId);
         setResults(resultsData);
