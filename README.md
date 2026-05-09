@@ -11,7 +11,7 @@ Backend foundation for a multi-agent construction procurement system. Day 1 scop
 
 ```powershell
 py -3.11 -m venv .venv
-.venv\Scripts\Activate.ps1
+.\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env
 ```

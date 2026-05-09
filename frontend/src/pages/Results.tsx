@@ -33,13 +33,27 @@ export default function Results() {
   };
 
   useEffect(() => {
-    fetchStatusAndResults();
-    
-    if (isPolling) {
-      const interval = setInterval(fetchStatusAndResults, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [requestId, isPolling]);
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let mounted = true;
+
+    const poll = async () => {
+      if (!isPolling || !mounted) return;
+      await fetchStatusAndResults();
+      
+      // If still polling after fetch, schedule next poll
+      if (mounted && isPolling) {
+        timeoutId = setTimeout(poll, 3000);
+      }
+    };
+
+    poll();
+
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [requestId, isPolling]); // Note: isPolling changes will re-trigger and handle cleanup appropriately
+
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">

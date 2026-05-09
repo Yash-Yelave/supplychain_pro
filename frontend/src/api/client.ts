@@ -1,14 +1,16 @@
 import axios from 'axios';
 
-// Ensure the trailing slash is removed if provided
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Use VITE_API_BASE_URL as requested by the deployment architecture
+const baseURL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const apiClient = axios.create({
   baseURL,
+  timeout: 30000, // 30 second timeout
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
 
 export interface ProcurementRequestCreate {
   material_type: string;

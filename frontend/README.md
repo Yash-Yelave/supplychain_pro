@@ -28,9 +28,16 @@ frontend/
 ## Setup Instructions
 
 ### 1. Configure Environment
-Ensure the backend is running. By default, the frontend will point to `http://localhost:8000`. If you need to change this, create a `.env` file in the `frontend` directory:
+Create `.env.development` for local development and `.env.production` for production builds:
+
 ```env
-VITE_API_URL=http://localhost:8000
+# .env.development
+VITE_API_BASE_URL=http://localhost:8000
+```
+
+```env
+# .env.production
+VITE_API_BASE_URL=https://api.yourdomain.com
 ```
 
 ### 2. Install Dependencies

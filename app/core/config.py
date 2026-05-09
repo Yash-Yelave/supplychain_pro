@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     db_disable_pooling: bool = False
     pipeline_use_langgraph: bool = False
     app_env: str = "development"
+    frontend_cors_origins: list[str] | str = ["http://localhost:5173", "http://localhost:3000"]
 
     model_config = SettingsConfigDict(
         env_file=".env",
