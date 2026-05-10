@@ -25,6 +25,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    @app.get("/")
+    async def root():
+        return {"status": "ok", "message": "ConstructProcure API is running!"}
+
     app.include_router(api_router)
     register_exception_handlers(app)
 
