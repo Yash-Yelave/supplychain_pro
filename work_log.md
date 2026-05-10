@@ -1,5 +1,46 @@
 # Work Log
 
+## 2026-05-09 - Frontend Dashboard + Backend Integration
+
+### Summary (what changed)
+- Built a minimal, professional React + Vite + TypeScript frontend dashboard in `frontend/`.
+- Implemented TailwindCSS for utility-based styling with zero extra bloat.
+- Built reusable frontend components: `RequestForm`, `StatusTracker`, `SupplierTable`, `FinalRecommendation`.
+- Implemented core frontend pages: `Home.tsx` and `Results.tsx` with React Router.
+- Integrated the frontend with the FastAPI backend using Axios and a centralized API client (`src/api/client.ts`).
+- Configured FastAPI `CORSMiddleware` in `app/main.py` with dynamic allowed origins (`FRONTEND_CORS_ORIGINS`).
+- Replaced hardcoded `localhost` references with environment variables (`VITE_API_BASE_URL`) for deployment readiness.
+- Fixed frontend/backend pipeline status enum mismatch (`complete` vs `completed`) and optimized frontend API polling logic with recursive `setTimeout`.
+- Created robust deployment and environment configuration documentation:
+  - `docs/deployment.md`
+  - `frontend/README.md`
+  - `frontend/.env.development` and `frontend/.env.production`
+  - Updated backend `.env.example`
+
+### What was validated
+- Frontend builds cleanly without TypeScript errors (`npm run build`).
+- Frontend interacts successfully with backend API across local environments via CORS.
+- Polling correctly stops when the pipeline signals `complete`.
+- Final recommendation results render effectively.
+
+### How to use (copy/paste)
+
+1) Start Backend (Terminal 1):
+```powershell
+.\venv\Scripts\Activate.ps1
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+2) Start Frontend (Terminal 2):
+```powershell
+cd frontend
+npm run dev
+```
+
+### Notes / gotchas
+- `FRONTEND_CORS_ORIGINS` in the backend must exactly match the frontend URL without trailing slashes.
+- Frontend uses `VITE_API_BASE_URL` to dynamically connect to the backend instance.
+
 ## 2026-05-08 - FastAPI Backend Layer + API/Pipeline Integration
 
 ### Summary (what changed)

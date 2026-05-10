@@ -7,6 +7,20 @@ Backend foundation for a multi-agent construction procurement system. Day 1 scop
 - Python 3.11
 - PostgreSQL database, including Supabase PostgreSQL
 
+## Run Backend
+
+```
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## Run Frontend
+
+```
+cd frontend
+npm install
+npm run dev
+```
+
 ## Setup
 
 ```powershell
