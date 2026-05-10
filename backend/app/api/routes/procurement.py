@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import traceback
 import uuid
 
-from fastapi import APIRouter, BackgroundTasks, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 from app.db.session import SessionLocal
 from app.schemas.procurement import ProcurementRequestCreate, ProcurementRequestCreateResponse, ProcurementResultsResponse, ProcurementStatusResponse
@@ -17,21 +18,26 @@ def create_procurement_request(
     payload: ProcurementRequestCreate,
     background_tasks: BackgroundTasks,
 ) -> ProcurementRequestCreateResponse:
-    db = SessionLocal()
     try:
-        req = create_request(db=db, payload=payload)
-        db.commit()
-        request_id = req.id
-        pipeline_status = req.status.value
-        current_agent = req.current_agent
-    finally:
-        db.close()
-    background_tasks.add_task(run_pipeline_for_request, request_id=request_id, payload=payload)
-    return ProcurementRequestCreateResponse(
-        request_id=request_id,
-        pipeline_status=pipeline_status,
-        current_agent=current_agent,
-    )
+        db = SessionLocal()
+        try:
+            req = create_request(db=db, payload=payload)
+            db.commit()
+            request_id = req.id
+            pipeline_status = req.status.value
+            current_agent = req.current_agent
+        finally:
+            db.close()
+        background_tasks.add_task(run_pipeline_for_request, request_id=request_id, payload=payload)
+        return ProcurementRequestCreateResponse(
+            request_id=request_id,
+            pipeline_status=pipeline_status,
+            current_agent=current_agent,
+        )
+    except Exception as e:
+        print("CRITICAL ERROR IN ROUTE:")
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Backend Crash: {str(e)}")
 
 
 @router.get("/{request_id}/status", response_model=ProcurementStatusResponse)
