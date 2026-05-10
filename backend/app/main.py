@@ -11,9 +11,11 @@ def create_app() -> FastAPI:
     app = FastAPI(title="ConstructProcure AI API", version="0.1.0")
 
     # Set up CORS
-    origins = settings.frontend_cors_origins
-    if isinstance(origins, str):
-        origins = [origin.strip() for origin in origins.split(",")]
+    origins = [
+        "https://supplychain-pro.vercel.app",
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
 
     app.add_middleware(
         CORSMiddleware,
