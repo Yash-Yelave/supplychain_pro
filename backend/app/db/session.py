@@ -19,7 +19,16 @@ else:
     engine_kwargs["max_overflow"] = settings.db_max_overflow
     engine_kwargs["pool_timeout"] = settings.db_pool_timeout_s
 
-engine = create_engine(settings.database_url, **engine_kwargs)
+db_url = settings.database_url
+if db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+if "?" not in db_url:
+    db_url += "?sslmode=require"
+elif "sslmode=" not in db_url:
+    db_url += "&sslmode=require"
+
+engine = create_engine(db_url, **engine_kwargs)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
