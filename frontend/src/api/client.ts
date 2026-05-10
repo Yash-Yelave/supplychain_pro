@@ -85,15 +85,30 @@ export interface ProcurementResultsResponse {
 
 export const procurementApi = {
   createRequest: async (data: ProcurementRequestCreate) => {
-    const response = await apiClient.post<ProcurementRequestCreateResponse>('/procurement/request', data);
-    return response.data;
+    try {
+      const response = await apiClient.post<ProcurementRequestCreateResponse>('/procurement/request', data);
+      return response.data;
+    } catch (error) {
+      console.error("Failed to create request. The backend might be asleep.", error);
+      throw error;
+    }
   },
   getStatus: async (id: string) => {
-    const response = await apiClient.get<ProcurementStatusResponse>(`/procurement/${id}/status`);
-    return response.data;
+    try {
+      const response = await apiClient.get<ProcurementStatusResponse>(`/procurement/${id}/status`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get status for ${id}`, error);
+      throw error;
+    }
   },
   getResults: async (id: string) => {
-    const response = await apiClient.get<ProcurementResultsResponse>(`/procurement/${id}/results`);
-    return response.data;
+    try {
+      const response = await apiClient.get<ProcurementResultsResponse>(`/procurement/${id}/results`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get results for ${id}`, error);
+      throw error;
+    }
   },
 };
