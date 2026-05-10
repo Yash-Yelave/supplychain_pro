@@ -1,5 +1,20 @@
 # Work Log
 
+## 2026-05-11 - Project Restructuring & Deployment Hardening
+
+### Summary (what changed)
+- Reorganized the project structure into a clean split: `frontend/` and `backend/` directories.
+- Moved all backend-related files (`app/`, `alembic/`, `scripts/`, `venv/`, configs) into the `backend/` folder.
+- Audited and updated CORS configuration in `backend/app/main.py` to explicitly allow the production Vercel origin.
+- Hardened frontend API client (`src/api/client.ts`) with `try/catch` blocks for better error handling during backend sleep/fail states.
+- Patched database connection session handling in `backend/app/db/session.py` to auto-correct Supabase URL schemes (`postgres://` -> `postgresql://`) and enforce `sslmode=require`.
+- Added a root health check endpoint (`/`) returning 200 OK in `main.py` to resolve Render deployment loops.
+- Unsilenced backend database errors by adding traceback printing to the `SQLAlchemyError` exception handler in `error_handlers.py`.
+- Wrapped the `/procurement/request` endpoint with explicit try/except blocks to print tracebacks and return error messages to the client for easier debugging on Render.
+
+### What was validated
+- Project successfully restructured without breaking relative paths.
+
 ## 2026-05-09 - Frontend Dashboard + Backend Integration
 
 ### Summary (what changed)
