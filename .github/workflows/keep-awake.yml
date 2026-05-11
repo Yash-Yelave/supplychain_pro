@@ -1,0 +1,13 @@
+name: Keep Render Awake
+
+on:
+  schedule:
+    - cron: '*/14 * * * *'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  ping-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Health Check
+        run: curl -s https://supplychain-pro.onrender.com/
