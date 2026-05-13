@@ -6,8 +6,10 @@ import { Send, Loader2 } from 'lucide-react';
 export default function RequestForm() {
   const [materialType, setMaterialType] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [unit, setUnit] = useState('pcs');
+  const [unit, setUnit] = useState('Tons');
   const [deadline, setDeadline] = useState('');
+  const [targetRegion, setTargetRegion] = useState('Global');
+  const [qualityGrade, setQualityGrade] = useState('Standard');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -23,6 +25,8 @@ export default function RequestForm() {
         quantity: Number(quantity),
         unit,
         deadline,
+        target_region: targetRegion,
+        quality_grade: qualityGrade,
       };
 
       const response = await procurementApi.createRequest(payload);
@@ -59,6 +63,36 @@ export default function RequestForm() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Target Supplier Region</label>
+            <select
+              required
+              value={targetRegion}
+              onChange={(e) => setTargetRegion(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Global">Global</option>
+              <option value="UAE">UAE</option>
+              <option value="China">China</option>
+              <option value="India">India</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Quality Grade</label>
+            <select
+              required
+              value={qualityGrade}
+              onChange={(e) => setQualityGrade(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Standard">Standard</option>
+              <option value="Premium">Premium</option>
+              <option value="Industrial Grade">Industrial Grade</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Quantity</label>
             <input
               type="number"
@@ -73,19 +107,24 @@ export default function RequestForm() {
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Unit</label>
-            <input
-              type="text"
+            <select
               required
               value={unit}
               onChange={(e) => setUnit(e.target.value)}
               className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g. tons, pcs, liters"
-            />
+            >
+              <option value="Tons">Tons</option>
+              <option value="Kilograms (kg)">Kilograms (kg)</option>
+              <option value="Liters">Liters</option>
+              <option value="Cubic Meters (cbm)">Cubic Meters (cbm)</option>
+              <option value="Bags">Bags</option>
+              <option value="Pieces">Pieces</option>
+            </select>
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">Deadline</label>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Shipping deadline</label>
           <input
             type="date"
             required
