@@ -1,5 +1,26 @@
 # Work Log
 
+## 2026-05-14 - Frontend UI Upgrades & Branching Strategy
+
+### Summary (what changed)
+- Upgraded the procurement request form in `frontend/src/components/RequestForm.tsx`:
+  - Added "Target Supplier Region" dropdown (Global, UAE, China, India).
+  - Added "Quality Grade" dropdown (Standard, Premium, Industrial Grade).
+  - Renamed "Deadline" label to "Shipping deadline".
+  - Converted "Units" input to a `<select>` dropdown with standard construction units (Tons, Kilograms (kg), Liters, Cubic Meters (cbm), Bags, Pieces).
+  - Ensured new fields are included in the API submission payload.
+- Implemented a tabbed interface in `frontend/src/pages/Home.tsx`:
+  - Tab 1: "Submit Request" (contains the form).
+  - Tab 2: "Current Data" (placeholder table for active leads).
+- Established a new branching strategy:
+  - `main` branch is for production.
+  - `stagging` branch is for staging/review before merging to production.
+- Pushed the new `stagging` branch to GitHub.
+
+### What was validated
+- Frontend components render correctly with new fields and tabs.
+- State management updated to handle new form fields.
+
 ## 2026-05-11 - Project Restructuring & Deployment Hardening
 
 ### Summary (what changed)
