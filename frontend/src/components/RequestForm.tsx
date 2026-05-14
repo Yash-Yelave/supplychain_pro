@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { procurementApi } from '../api/client';
 import { Send, Loader2 } from 'lucide-react';
 
 export default function RequestForm() {
   const [materialType, setMaterialType] = useState('');
+  const [availableMaterials, setAvailableMaterials] = useState<string[]>([]);
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('Tons');
   const [deadline, setDeadline] = useState('');
@@ -13,6 +14,18 @@ export default function RequestForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchMaterials = async () => {
+      try {
+        const data = await procurementApi.getMaterials();
+        setAvailableMaterials(data.materials);
+      } catch (err) {
+        console.error("Failed to load materials", err);
+      }
+    };
+    fetchMaterials();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,14 +69,19 @@ export default function RequestForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Material Type</label>
-          <input
-            type="text"
+          <select
             required
             value={materialType}
             onChange={(e) => setMaterialType(e.target.value)}
-            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="e.g. Steel Rebar, Portland Cement"
-          />
+            className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+          >
+            <option value="" disabled>Select a Material...</option>
+            {availableMaterials.map((material) => (
+              <option key={material} value={material}>
+                {material}
+              </option>
+            ))}
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

@@ -133,4 +133,13 @@ export const procurementApi = {
       throw error;
     }
   },
+  getMaterials: async () => {
+    try {
+      const response = await apiClient.get<{ materials: string[] }>('/procurement/materials');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get materials', error);
+      throw error;
+    }
+  },
 };
