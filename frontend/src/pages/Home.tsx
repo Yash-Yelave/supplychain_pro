@@ -1,9 +1,22 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import RequestForm from '../components/RequestForm';
-import { PackageSearch } from 'lucide-react';
+import { PackageSearch, Loader2 } from 'lucide-react';
+import { procurementApi, ActiveProcurementRequest } from '../api/client';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('submit');
+  const [activeRequests, setActiveRequests] = useState<ActiveProcurementRequest[]>([]);
+  const [loadingActive, setLoadingActive] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'data') {
+      setLoadingActive(true);
+      procurementApi.getActive()
+        .then(data => setActiveRequests(data))
+        .catch(err => console.error(err))
+        .finally(() => setLoadingActive(false));
+    }
+  }, [activeTab]);
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
@@ -78,18 +91,58 @@ export default function Home() {
               <table className="min-w-full divide-y divide-slate-200">
                 <thead className="bg-slate-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Date</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Material</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Region</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Qty/Unit</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Target Region</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Quality</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-slate-200">
-                  <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
-                      No active leads found. Displaying placeholder table.
-                    </td>
-                  </tr>
+                  {loadingActive ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                        <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-500" />
+                        <p>Loading active requests...</p>
+                      </td>
+                    </tr>
+                  ) : activeRequests.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
+                        No active leads found.
+                      </td>
+                    </tr>
+                  ) : (
+                    activeRequests.map((req) => (
+                      <tr key={req.id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {new Date(req.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900 font-medium">
+                          {req.material_type}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {req.quantity} {req.unit}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {req.target_country_code === 'GL' ? 'Global' : req.target_country_code}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                          {req.quality_grade}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            req.status === 'complete' ? 'bg-green-100 text-green-800' :
+                            req.status === 'failed' ? 'bg-red-100 text-red-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {req.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>

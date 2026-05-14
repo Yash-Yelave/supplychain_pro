@@ -22,7 +22,10 @@ class ActiveProcurementRequest(BaseModel):
     status: str
     material_type: str
     quantity: float
+    unit: str
     target_country_code: str
+    quality_grade: str
+    created_at: datetime
 
 
 class ProcurementRequestCreateResponse(BaseModel):

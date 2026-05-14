@@ -20,12 +20,17 @@ export default function RequestForm() {
     setIsLoading(true);
 
     try {
+      let target_country_code = 'GL';
+      if (targetRegion === 'UAE') target_country_code = 'AE';
+      else if (targetRegion === 'China') target_country_code = 'CN';
+      else if (targetRegion === 'India') target_country_code = 'IN';
+
       const payload = {
         material_type: materialType,
         quantity: Number(quantity),
         unit,
-        deadline,
-        target_region: targetRegion,
+        shipping_deadline: deadline,
+        target_country_code,
         quality_grade: qualityGrade,
       };
 

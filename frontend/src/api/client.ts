@@ -16,7 +16,20 @@ export interface ProcurementRequestCreate {
   material_type: string;
   quantity: number;
   unit: string;
-  deadline: string; // YYYY-MM-DD
+  shipping_deadline: string; // YYYY-MM-DD
+  target_country_code: string;
+  quality_grade: string;
+}
+
+export interface ActiveProcurementRequest {
+  id: string;
+  status: string;
+  material_type: string;
+  quantity: number;
+  unit: string;
+  target_country_code: string;
+  quality_grade: string;
+  created_at: string;
 }
 
 export interface ProcurementRequestCreateResponse {
@@ -108,6 +121,15 @@ export const procurementApi = {
       return response.data;
     } catch (error) {
       console.error(`Failed to get results for ${id}`, error);
+      throw error;
+    }
+  },
+  getActive: async () => {
+    try {
+      const response = await apiClient.get<ActiveProcurementRequest[]>('/procurement/active');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get active requests', error);
       throw error;
     }
   },

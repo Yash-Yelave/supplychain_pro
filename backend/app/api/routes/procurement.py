@@ -58,7 +58,10 @@ def get_active_requests() -> list[ActiveProcurementRequest]:
                 status=req.status.value,
                 material_type=req.material_type,
                 quantity=req.quantity,
-                target_country_code=req.target_country_code
+                unit=req.unit,
+                target_country_code=req.target_country_code,
+                quality_grade=req.quality_grade,
+                created_at=req.created_at
             )
             for req in requests
         ]
