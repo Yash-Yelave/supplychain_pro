@@ -15,13 +15,17 @@ def create_procurement_request(
     material_type: str,
     quantity: float,
     unit: str,
-    deadline: date,
+    shipping_deadline: date,
+    target_country_code: str,
+    quality_grade: str,
 ) -> ProcurementRequest:
     req = ProcurementRequest(
         material_type=material_type.strip().lower(),
         quantity=quantity,
         unit=unit.strip(),
-        deadline=deadline,
+        shipping_deadline=shipping_deadline,
+        target_country_code=target_country_code,
+        quality_grade=quality_grade,
         status=ProcurementRequestStatus.in_progress,
         current_agent="supervisor",
     )

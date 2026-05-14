@@ -23,7 +23,9 @@ class ProcurementRequest(Base):
     material_type: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
     quantity: Mapped[float] = mapped_column(nullable=False)
     unit: Mapped[str] = mapped_column(String(50), nullable=False)
-    deadline: Mapped[date] = mapped_column(Date, nullable=False)
+    shipping_deadline: Mapped[date] = mapped_column(Date, nullable=False)
+    target_country_code: Mapped[str] = mapped_column(String(2), nullable=False)
+    quality_grade: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[ProcurementRequestStatus] = mapped_column(
         Enum(ProcurementRequestStatus, name="procurement_request_status"),
         nullable=False,

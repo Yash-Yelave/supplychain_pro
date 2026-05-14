@@ -27,7 +27,7 @@ from app.schemas.procurement import (
 
 
 def create_request(*, db: Session, payload: ProcurementRequestCreate) -> ProcurementRequest:
-    if payload.deadline < datetime.now(timezone.utc).date():
+    if payload.shipping_deadline < datetime.now(timezone.utc).date():
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="deadline must not be in the past",
@@ -37,7 +37,9 @@ def create_request(*, db: Session, payload: ProcurementRequestCreate) -> Procure
         material_type=payload.material_type,
         quantity=payload.quantity,
         unit=payload.unit,
-        deadline=payload.deadline,
+        shipping_deadline=payload.shipping_deadline,
+        target_country_code=payload.target_country_code,
+        quality_grade=payload.quality_grade,
     )
     return req
 
@@ -52,7 +54,9 @@ def run_pipeline_for_request(*, request_id: uuid.UUID, payload: ProcurementReque
                 material_type=payload.material_type,
                 quantity=payload.quantity,
                 unit=payload.unit,
-                deadline=payload.deadline,
+                shipping_deadline=payload.shipping_deadline,
+                target_country_code=payload.target_country_code,
+                quality_grade=payload.quality_grade,
             ),
             request_id=request_id,
             status=PipelineStatus.discovering,

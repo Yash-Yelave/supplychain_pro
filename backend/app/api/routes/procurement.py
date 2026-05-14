@@ -6,8 +6,11 @@ import uuid
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 from app.db.session import SessionLocal
-from app.schemas.procurement import ProcurementRequestCreate, ProcurementRequestCreateResponse, ProcurementResultsResponse, ProcurementStatusResponse
+from app.schemas.procurement import ProcurementRequestCreate, ProcurementRequestCreateResponse, ProcurementResultsResponse, ProcurementStatusResponse, ActiveProcurementRequest
 from app.services.procurement_service import create_request, get_results, get_status, run_pipeline_for_request
+from app.services.region_strategy import get_region_strategy
+from app.models.procurement_request import ProcurementRequest
+from sqlalchemy import select
 
 
 router = APIRouter()
@@ -21,6 +24,9 @@ def create_procurement_request(
     try:
         db = SessionLocal()
         try:
+            strategy = get_region_strategy(payload.target_country_code)
+            print(f"Detected currency: {strategy.default_currency}, Tax rate: {strategy.get_tax_rate()}")
+            
             req = create_request(db=db, payload=payload)
             db.commit()
             request_id = req.id
@@ -40,6 +46,26 @@ def create_procurement_request(
         raise HTTPException(status_code=500, detail=f"Backend Crash: {str(e)}")
 
 
+@router.get("/active", response_model=list[ActiveProcurementRequest])
+def get_active_requests() -> list[ActiveProcurementRequest]:
+    db = SessionLocal()
+    try:
+        stmt = select(ProcurementRequest).order_by(ProcurementRequest.created_at.desc()).limit(10)
+        requests = db.scalars(stmt).all()
+        return [
+            ActiveProcurementRequest(
+                id=req.id,
+                status=req.status.value,
+                material_type=req.material_type,
+                quantity=req.quantity,
+                target_country_code=req.target_country_code
+            )
+            for req in requests
+        ]
+    finally:
+        db.close()
+
+
 @router.get("/{request_id}/status", response_model=ProcurementStatusResponse)
 def get_procurement_status(request_id: uuid.UUID) -> ProcurementStatusResponse:
     db = SessionLocal()
@@ -56,3 +82,5 @@ def get_procurement_results(request_id: uuid.UUID) -> ProcurementResultsResponse
         return get_results(db=db, request_id=request_id)
     finally:
         db.close()
+
+

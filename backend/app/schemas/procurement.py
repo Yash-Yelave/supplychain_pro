@@ -13,7 +13,16 @@ class ProcurementRequestCreate(BaseModel):
     material_type: str = Field(min_length=1, max_length=100)
     quantity: float = Field(gt=0)
     unit: str = Field(min_length=1, max_length=50)
-    deadline: date
+    shipping_deadline: date
+    target_country_code: str = Field(min_length=2, max_length=2)
+    quality_grade: str = Field(min_length=1, max_length=50)
+
+class ActiveProcurementRequest(BaseModel):
+    id: uuid.UUID
+    status: str
+    material_type: str
+    quantity: float
+    target_country_code: str
 
 
 class ProcurementRequestCreateResponse(BaseModel):
