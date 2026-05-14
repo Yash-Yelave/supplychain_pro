@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import RequestForm from '../components/RequestForm';
 import { PackageSearch, Loader2 } from 'lucide-react';
-import { procurementApi, ActiveProcurementRequest } from '../api/client';
+import { procurementApi, type ActiveProcurementRequest } from '../api/client';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('submit');
