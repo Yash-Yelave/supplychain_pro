@@ -1,5 +1,24 @@
 # Work Log
 
+## 2026-05-15 - Backend Pipeline Fixes & Dynamic Materials Dropdown
+
+### Summary (what changed)
+- Fixed backend pipeline crashes:
+  - Resolved case-sensitive array search for material categories in `app/crud/suppliers.py` by using `cast(material_categories, String).ilike(...)`.
+  - Fixed missing `location` property in `app/procurement/agents/discovery.py` by constructing it from `city`, `region`, and `country_code`.
+  - Resolved PostgreSQL enum casting issues by mapping `status` as `String(50)` instead of `Enum` in `app/models/procurement_request.py` and removing the dropped type `procurement_request_status`.
+  - Fixed accessing renamed property `deadline` to `shipping_deadline` in `app/procurement/agents/analyst.py`.
+- Added new backend endpoint:
+  - `GET /procurement/materials` to fetch unique available materials from suppliers.
+- Upgraded frontend `RequestForm.tsx`:
+  - Converted "Material Type" text input into a dynamic `<select>` dropdown populated from the new backend endpoint.
+- Cleaned up backend directory:
+  - Moved temporary/test scripts (`check_categories.py`, `check_db.py`, etc.) to `backend/debug_scripts`.
+
+### What was validated
+- Pipeline runs successfully end-to-end via manual test script.
+- Frontend dropdown correctly populates with materials from database.
+
 ## 2026-05-14 - Frontend UI Upgrades & Branching Strategy
 
 ### Summary (what changed)
