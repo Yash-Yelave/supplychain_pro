@@ -67,7 +67,10 @@ def run_pipeline_for_request(*, request_id: uuid.UUID, payload: ProcurementReque
                 run_langgraph_from_existing_request(state, db=db)
             else:
                 run_sequential_from_existing_request(state, db=db)
-        except Exception:
+        except Exception as e:
+            import traceback
+            print(f"Pipeline crashed for request {request_id}:")
+            traceback.print_exc()
             set_request_agent_and_status(
                 db=db,
                 request_id=request_id,
@@ -91,7 +94,7 @@ def get_status(*, db: Session, request_id: uuid.UUID) -> ProcurementStatusRespon
 
     return ProcurementStatusResponse(
         request_id=req.id,
-        pipeline_status=req.status.value,
+        pipeline_status=req.status,
         current_agent=req.current_agent,
         supplier_count=int(supplier_count),
         quotation_count=int(quotation_count),
@@ -163,7 +166,7 @@ def get_results(*, db: Session, request_id: uuid.UUID) -> ProcurementResultsResp
 
     return ProcurementResultsResponse(
         request_id=req.id,
-        pipeline_status=req.status.value,
+        pipeline_status=req.status,
         ranked_suppliers=ranked_suppliers,
         trust_scores=trust_scores,
         extracted_quotations=extracted_quotations,

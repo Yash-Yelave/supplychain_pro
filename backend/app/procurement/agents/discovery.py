@@ -23,7 +23,7 @@ def discovery_agent(state: ProcurementState, *, db: Session) -> ProcurementState
             id=s.id,
             name=s.name,
             email=s.email,
-            location=s.location,
+            location=f"{s.city}, {s.region}, {s.country_code}",
             material_categories=list(s.material_categories),
             simulated_response_hours=int(s.simulated_response_hours),
             referral_count=int(s.referral_count),

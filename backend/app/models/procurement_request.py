@@ -27,7 +27,7 @@ class ProcurementRequest(Base):
     target_country_code: Mapped[str] = mapped_column(String(2), nullable=False)
     quality_grade: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[ProcurementRequestStatus] = mapped_column(
-        Enum(ProcurementRequestStatus, name="procurement_request_status"),
+        String(50),
         nullable=False,
         default=ProcurementRequestStatus.pending,
         server_default=ProcurementRequestStatus.pending.value,

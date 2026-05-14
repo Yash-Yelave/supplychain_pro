@@ -30,7 +30,7 @@ def create_procurement_request(
             req = create_request(db=db, payload=payload)
             db.commit()
             request_id = req.id
-            pipeline_status = req.status.value
+            pipeline_status = req.status
             current_agent = req.current_agent
         finally:
             db.close()
@@ -55,7 +55,7 @@ def get_active_requests() -> list[ActiveProcurementRequest]:
         return [
             ActiveProcurementRequest(
                 id=req.id,
-                status=req.status.value,
+                status=req.status,
                 material_type=req.material_type,
                 quantity=req.quantity,
                 unit=req.unit,

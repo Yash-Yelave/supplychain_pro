@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.models.procurement_request import ProcurementRequest, ProcurementRequestStatus
@@ -42,14 +42,12 @@ def set_request_agent_and_status(
     status: ProcurementRequestStatus | str | None = None,
     completed_at: datetime | None = None,
 ) -> None:
-    req = db.get(ProcurementRequest, request_id)
-    if req is None:
-        raise RuntimeError(f"ProcurementRequest not found: {request_id}")
-    req.current_agent = agent
-    if status is not None:
-        req.status = ProcurementRequestStatus(status)
-    if completed_at is not None:
-        req.completed_at = completed_at
+    stmt = (
+        update(ProcurementRequest)
+        .where(ProcurementRequest.id == request_id)
+        .values(current_agent=agent, status=status.value if isinstance(status, ProcurementRequestStatus) else status, completed_at=completed_at)
+    )
+    db.execute(stmt)
     db.flush()
 
 

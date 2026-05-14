@@ -28,7 +28,7 @@ def analyst_agent(state: ProcurementState, *, db: Session, top_n: int = 3) -> Pr
     lines: list[str] = []
 
     lines.append(f"Procurement material: {state.request.material_type} ({state.request.quantity} {state.request.unit})")
-    lines.append(f"Deadline: {state.request.deadline.isoformat()}")
+    lines.append(f"Deadline: {state.request.shipping_deadline.isoformat()}")
     lines.append("")
     lines.append("Top supplier recommendations:")
 

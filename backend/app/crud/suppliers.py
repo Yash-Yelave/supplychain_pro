@@ -1,6 +1,7 @@
 import uuid
 
 from sqlalchemy import select
+import sqlalchemy as sa
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
@@ -34,7 +35,7 @@ def get_suppliers_by_category(material_type: str, db: Session | None = None) -> 
         category = material_type.strip().lower()
         statement = (
             select(Supplier)
-            .where(Supplier.material_categories.contains([category]))
+            .where(sa.cast(Supplier.material_categories, sa.String).ilike(f'%{category}%'))
             .order_by(Supplier.simulated_response_hours, Supplier.name)
         )
         return list(db.scalars(statement).all())
