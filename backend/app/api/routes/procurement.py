@@ -10,6 +10,7 @@ from app.schemas.procurement import ProcurementRequestCreate, ProcurementRequest
 from app.services.procurement_service import create_request, get_results, get_status, run_pipeline_for_request
 from app.services.region_strategy import get_region_strategy
 from app.models.procurement_request import ProcurementRequest
+from app.models.supplier import Supplier
 from sqlalchemy import select
 
 
@@ -87,3 +88,15 @@ def get_procurement_results(request_id: uuid.UUID) -> ProcurementResultsResponse
         db.close()
 
 
+@router.get("/materials")
+def get_available_materials() -> dict[str, list[str]]:
+    db = SessionLocal()
+    try:
+        suppliers = db.scalars(select(Supplier)).all()
+        materials = set()
+        for s in suppliers:
+            if s.material_categories:
+                materials.update(s.material_categories)
+        return {"materials": sorted(list(materials))}
+    finally:
+        db.close()
