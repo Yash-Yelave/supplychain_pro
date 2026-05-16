@@ -77,6 +77,7 @@ class TrustScoreBreakdown(BaseModel):
     referral_score: float = Field(ge=0.0, le=1.0)
     composite_score: float = Field(ge=0.0, le=1.0)
     weights_used: dict[str, float]
+    score_analysis: dict[str, str] | None = None
 
 
 class FinalReportSnapshot(BaseModel):
