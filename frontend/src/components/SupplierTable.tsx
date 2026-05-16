@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { ProcurementResultsResponse } from '../api/client';
 
 interface Props {
@@ -52,9 +53,14 @@ export default function SupplierTable({ results }: Props) {
                       {supplier.rank}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-medium text-slate-800">
-                    <div>{supplier.supplier_name}</div>
-                    <div className="text-xs text-slate-400 font-normal">{supplier.location}</div>
+                  <td className="px-4 py-3">
+                    <Link
+                      to={`/supplier/${supplier.supplier_id}`}
+                      className="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    >
+                      {supplier.supplier_name}
+                    </Link>
+                    <div className="text-xs text-slate-400 font-normal mt-0.5">{supplier.location}</div>
                   </td>
                   <td className="px-4 py-3 text-center">
                     <Tooltip content={sa.price_logic}>

@@ -57,6 +57,7 @@ export interface RankedSupplier {
   unit_price: number | null;
   currency: string | null;
   scores: Record<string, number>;
+  score_analysis?: Record<string, string>;
 }
 
 export interface TrustScoreRow {
