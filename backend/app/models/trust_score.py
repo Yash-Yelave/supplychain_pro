@@ -22,6 +22,7 @@ class TrustScore(Base):
     referral_score: Mapped[Decimal] = mapped_column(Numeric(5, 4), nullable=False)
     composite_score: Mapped[Decimal] = mapped_column(Numeric(5, 4), nullable=False, index=True)
     weights_used: Mapped[dict[str, float]] = mapped_column(JSONB, nullable=False)
+    score_analysis: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=True)
     computed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     request = relationship("ProcurementRequest", back_populates="trust_scores")
