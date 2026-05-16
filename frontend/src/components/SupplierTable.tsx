@@ -56,6 +56,8 @@ export default function SupplierTable({ results }: Props) {
                   <td className="px-4 py-3">
                     <Link
                       to={`/supplier/${supplier.supplier_id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                     >
                       {supplier.supplier_name}

@@ -238,6 +238,8 @@ export default function Home() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <Link
                                 to={`/supplier/${supplier.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                               >
                                 {supplier.name}
