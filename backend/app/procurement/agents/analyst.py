@@ -67,6 +67,7 @@ def analyst_agent(state: ProcurementState, *, db: Session, top_n: int = 3) -> Pr
                     "quote_completeness": s.quote_completeness,
                     "referral": s.referral_score,
                 },
+                "score_analysis": s.score_analysis,
             }
         )
 
