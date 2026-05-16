@@ -49,6 +49,16 @@ def _normalize_low_is_better(v: float, *, v_min: float, v_max: float) -> float:
     return max(0.0, min(1.0, (v_max - v) / (v_max - v_min)))
 
 
+def price_percentile_score(v: float, values: list[float]) -> float:
+    if not values or len(values) <= 1 or max(values) == min(values):
+        return 1.0
+    worse_count = sum(1 for x in values if x > v)
+    max_worse = sum(1 for x in values if x > min(values))
+    if max_worse == 0:
+        return 1.0
+    return worse_count / max_worse
+
+
 def _normalize_high_is_better(v: float, *, v_min: float, v_max: float) -> float:
     if v_max <= v_min:
         return 1.0
@@ -109,7 +119,7 @@ def compute_trust_scores(
         response_h = float(supplier_response_hours.get(sid, resp_max if resp else 0.0))
         referrals = int(supplier_referrals.get(sid, 0))
 
-        price_score = _normalize_low_is_better(price, v_min=price_min, v_max=price_max) if prices else 0.0
+        price_score = price_percentile_score(price, prices) if prices else 0.0
         response_score = _normalize_low_is_better(response_h, v_min=resp_min, v_max=resp_max) if resp else 0.0
         complete_score = completeness_score(
             missing_fields=supplier_missing_fields.get(sid, []),
