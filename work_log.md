@@ -1,5 +1,35 @@
 # Work Log
 
+## 2026-05-16 - Scoring Explainability & Supplier Directory/Profiles
+
+### Summary (what changed)
+- **Scoring Explainability Layer**:
+  - Enhanced the procurement scoring engine to provide human-readable math breakdowns for every score.
+  - Added `score_analysis` column to the `TrustScore` database model.
+  - Updated backend logic in `compute_trust_scores` to generate dynamic explanation strings for Price, Speed, Quality, and Trust metrics.
+  - Exposed the logic through the API via updated Pydantic schemas.
+- **Frontend Scoring Transparency**:
+  - Refactored the `SupplierTable` component to display individual component scores (Price, Speed, Quality, Trust) alongside the composite score.
+  - Implemented a cinematic dark-themed tooltip system using standard Tailwind CSS (`group-hover`) to display the scoring logic on hover.
+- **Supplier Directory & Profiles**:
+  - Built a full-stack Supplier Directory:
+    - Created `GET /api/suppliers` and `GET /api/suppliers/{id}` endpoints.
+    - Implemented a sub-navigation toggle in the "Current Data" tab to switch between Active Requests and the Supplier Directory.
+    - Created a professional Directory table with Lucide icons and material category tags.
+  - Developed a dynamic Supplier Profile page (`SupplierProfile.tsx`):
+    - Features a modern, dark-themed UI with a header, info cards (Email, Location, Material Count), and core material badges.
+    - Implemented dynamic routing (`/supplier/:id`) and data fetching via `useParams`.
+  - Enhanced UX by ensuring all supplier profile links open in a **new tab** for non-disruptive navigation.
+- **Code Quality & Maintenance**:
+  - Fixed database dependency imports (`get_db`).
+  - Verified TypeScript type safety (0 errors found).
+  - Staged and committed all changes to the `stagging` branch.
+
+### What was validated
+- Backend endpoints (`GET /api/suppliers` and `GET /api/suppliers/{id}`) verified via terminal simulation.
+- Frontend routing and profile template verified with TypeScript compiler (`npx tsc --noEmit`).
+- Tooltip UI and tab toggles confirmed to match design requirements.
+
 ## 2026-05-15 - Backend Pipeline Fixes & Dynamic Materials Dropdown
 
 ### Summary (what changed)
