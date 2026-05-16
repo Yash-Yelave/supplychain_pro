@@ -113,18 +113,20 @@ def compute_trust_scores(
     resp_min, resp_max = _min_max(resp)
     max_referrals = max(refs) if refs else 0
 
-    out: dict[uuid.UUID, dict[str, float]] = {}
+    out: dict[uuid.UUID, dict[str, Any]] = {}
     for sid in supplier_ids:
         price = float(supplier_unit_prices.get(sid, price_max if prices else 0.0))
         response_h = float(supplier_response_hours.get(sid, resp_max if resp else 0.0))
         referrals = int(supplier_referrals.get(sid, 0))
+        missing_fields = supplier_missing_fields.get(sid, [])
+        extraction_conf = float(supplier_extraction_confidence.get(sid, 0.0))
 
         price_score = price_percentile_score(price, prices) if prices else 0.0
         response_score = _normalize_low_is_better(response_h, v_min=resp_min, v_max=resp_max) if resp else 0.0
         complete_score = completeness_score(
-            missing_fields=supplier_missing_fields.get(sid, []),
+            missing_fields=missing_fields,
             core_field_count=core_field_count,
-            extraction_confidence=float(supplier_extraction_confidence.get(sid, 0.0)),
+            extraction_confidence=extraction_conf,
         )
         ref_score = referral_score_log(referrals, max_referrals=max_referrals)
 
@@ -135,6 +137,17 @@ def compute_trust_scores(
             + weights_dict["referral_score"] * ref_score
         )
 
+        worse_count = sum(1 for x in prices if x > price) if prices else 0
+        total_unique = sum(1 for x in prices if x > min(prices)) if prices else 0
+
+        score_analysis = {
+            "price_logic": f"Price AED {price:.2f}. " + (f"Cheaper than {worse_count} out of {total_unique} competing price tiers." if total_unique > 0 else "Sole or best price tier."),
+            "speed_logic": f"Response in {response_h} hours (Best: {resp_min}h, Worst: {resp_max}h).",
+            "quality_logic": f"Extracted {core_field_count - len(missing_fields)}/{core_field_count} core fields with {extraction_conf*100:.0f}% LLM confidence.",
+            "trust_logic": f"Supplier has {referrals} referrals (Market Max: {max_referrals}).",
+            "final_logic": f"Composite score calculated using weights: Price ({weights_dict['price_competitiveness']*100:.0f}%), Speed ({weights_dict['response_speed_score']*100:.0f}%), Quality ({weights_dict['quote_completeness']*100:.0f}%), Trust ({weights_dict['referral_score']*100:.0f}%)."
+        }
+
         out[sid] = {
             "price_competitiveness": float(price_score),
             "response_speed_score": float(response_score),
@@ -142,6 +155,7 @@ def compute_trust_scores(
             "referral_score": float(ref_score),
             "composite_score": float(max(0.0, min(1.0, composite))),
             "weights_used": weights_dict,
+            "score_analysis": score_analysis,
         }
     return out
 

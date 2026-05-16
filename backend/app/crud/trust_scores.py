@@ -20,6 +20,7 @@ def upsert_trust_score(
     referral_score: float,
     composite_score: float,
     weights_used: dict[str, float],
+    score_analysis: dict[str, str] | None = None,
 ) -> TrustScore:
     stmt = select(TrustScore).where(TrustScore.request_id == request_id, TrustScore.supplier_id == supplier_id)
     existing = db.scalar(stmt)
@@ -31,6 +32,8 @@ def upsert_trust_score(
     row.referral_score = Decimal(str(referral_score)).quantize(Decimal("0.0001"))
     row.composite_score = Decimal(str(composite_score)).quantize(Decimal("0.0001"))
     row.weights_used = weights_used
+    if score_analysis is not None:
+        row.score_analysis = score_analysis
 
     if existing is None:
         db.add(row)
