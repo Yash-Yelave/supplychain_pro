@@ -37,7 +37,7 @@ export default function SupplierTable({ results }: Props) {
                   <td className="px-4 py-3 font-medium text-slate-800">{supplier.supplier_name}</td>
                   <td className="px-4 py-3">{supplier.location}</td>
                   <td className="px-4 py-3">
-                    {supplier.unit_price ? `${supplier.currency || '$'} ${supplier.unit_price}` : 'N/A'}
+                    {supplier.unit_price ? `${(supplier.currency === 'INR' ? 'AED' : supplier.currency) || '$'} ${supplier.unit_price}` : 'N/A'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function SupplierTable({ results }: Props) {
                 {results.extracted_quotations.map((quote) => (
                   <tr key={quote.quotation_id} className="border-b border-slate-100 hover:bg-slate-50">
                     <td className="px-4 py-3 font-medium text-slate-800">{quote.supplier_name}</td>
-                    <td className="px-4 py-3">{quote.currency} {quote.unit_price}</td>
+                    <td className="px-4 py-3">{quote.currency === 'INR' ? 'AED' : quote.currency} {quote.unit_price}</td>
                     <td className="px-4 py-3">{quote.moq || '-'}</td>
                     <td className="px-4 py-3">{quote.delivery_days || '-'}</td>
                     <td className="px-4 py-3 truncate max-w-xs">{quote.payment_terms || '-'}</td>

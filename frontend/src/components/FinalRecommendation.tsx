@@ -22,7 +22,7 @@ export default function FinalRecommendation({ results }: Props) {
             <FileText className="w-4 h-4" /> Analyst Summary
           </h3>
           <div className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-            <ReactMarkdown>{results.analyst_summary}</ReactMarkdown>
+            <ReactMarkdown>{results.analyst_summary.replace(/INR/g, 'AED')}</ReactMarkdown>
           </div>
         </div>
       )}
@@ -33,7 +33,7 @@ export default function FinalRecommendation({ results }: Props) {
             <FileText className="w-4 h-4" /> Detailed Report
           </h3>
           <div className="text-sm text-slate-700 leading-relaxed prose prose-sm max-w-none">
-            <ReactMarkdown>{results.final_recommendation_report}</ReactMarkdown>
+            <ReactMarkdown>{results.final_recommendation_report.replace(/INR/g, 'AED')}</ReactMarkdown>
           </div>
         </div>
       )}

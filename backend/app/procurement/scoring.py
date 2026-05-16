@@ -7,10 +7,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class TrustScoreWeights:
-    price_competitiveness: float = 0.45
-    response_speed_score: float = 0.20
-    quote_completeness: float = 0.25
-    referral_score: float = 0.10
+    price_competitiveness: float = 0.3333
+    response_speed_score: float = 0.0
+    quote_completeness: float = 0.3333
+    referral_score: float = 0.3333
 
     def as_dict(self) -> dict[str, float]:
         return {
