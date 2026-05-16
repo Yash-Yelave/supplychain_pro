@@ -4,6 +4,19 @@ interface Props {
   results: ProcurementResultsResponse | null;
 }
 
+const Tooltip = ({ children, content }: { children: React.ReactNode, content: string | undefined }) => {
+  if (!content) return <>{children}</>;
+  return (
+    <div className="group relative inline-flex items-center cursor-help">
+      {children}
+      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-64 p-2 bg-slate-900 text-slate-100 text-xs rounded shadow-lg z-50 whitespace-normal">
+        {content}
+        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+      </div>
+    </div>
+  );
+};
+
 export default function SupplierTable({ results }: Props) {
   if (!results || !results.ranked_suppliers || results.ranked_suppliers.length === 0) return null;
 
@@ -19,13 +32,18 @@ export default function SupplierTable({ results }: Props) {
             <tr>
               <th className="px-4 py-3">Rank</th>
               <th className="px-4 py-3">Supplier</th>
-              <th className="px-4 py-3">Location</th>
-              <th className="px-4 py-3">Unit Price</th>
-              <th className="px-4 py-3">Score</th>
+              <th className="px-4 py-3 text-center">Price Score</th>
+              <th className="px-4 py-3 text-center">Speed Score</th>
+              <th className="px-4 py-3 text-center">Quality Score</th>
+              <th className="px-4 py-3 text-center">Trust Score</th>
+              <th className="px-4 py-3">Final Score</th>
             </tr>
           </thead>
           <tbody>
             {results.ranked_suppliers.map((supplier) => {
+              const sa = supplier.score_analysis || {};
+              const s = supplier.scores || {};
+              
               return (
                 <tr key={supplier.supplier_id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                   <td className="px-4 py-3">
@@ -34,21 +52,42 @@ export default function SupplierTable({ results }: Props) {
                       {supplier.rank}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-medium text-slate-800">{supplier.supplier_name}</td>
-                  <td className="px-4 py-3">{supplier.location}</td>
-                  <td className="px-4 py-3">
-                    {supplier.unit_price ? `${(supplier.currency === 'INR' ? 'AED' : supplier.currency) || '$'} ${supplier.unit_price}` : 'N/A'}
+                  <td className="px-4 py-3 font-medium text-slate-800">
+                    <div>{supplier.supplier_name}</div>
+                    <div className="text-xs text-slate-400 font-normal">{supplier.location}</div>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <Tooltip content={sa.price_logic}>
+                      <span className="border-b border-dotted border-slate-400">{((s.price_competitiveness || 0) * 100).toFixed(0)}%</span>
+                    </Tooltip>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <Tooltip content={sa.speed_logic}>
+                      <span className="border-b border-dotted border-slate-400">{((s.response_speed || 0) * 100).toFixed(0)}%</span>
+                    </Tooltip>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <Tooltip content={sa.quality_logic}>
+                      <span className="border-b border-dotted border-slate-400">{((s.quote_completeness || 0) * 100).toFixed(0)}%</span>
+                    </Tooltip>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <Tooltip content={sa.trust_logic}>
+                      <span className="border-b border-dotted border-slate-400">{((s.referral || 0) * 100).toFixed(0)}%</span>
+                    </Tooltip>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 bg-slate-200 rounded-full h-2">
-                        <div 
-                          className="bg-blue-500 h-2 rounded-full" 
-                          style={{ width: `${(supplier.scores.composite_score || 0) * 100}%` }}
-                        ></div>
+                    <Tooltip content={sa.final_logic}>
+                      <div className="flex items-center gap-2 border-b border-dotted border-slate-400 pb-0.5 inline-flex">
+                        <div className="w-16 bg-slate-200 rounded-full h-2">
+                          <div 
+                            className="bg-blue-500 h-2 rounded-full" 
+                            style={{ width: `${(s.composite || 0) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-xs font-semibold">{((s.composite || 0) * 100).toFixed(0)}%</span>
                       </div>
-                      <span className="text-xs">{((supplier.scores.composite_score || 0) * 100).toFixed(0)}%</span>
-                    </div>
+                    </Tooltip>
                   </td>
                 </tr>
               );
