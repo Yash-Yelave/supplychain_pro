@@ -53,6 +53,7 @@ class RankedSupplier(BaseModel):
     unit_price: float | None
     currency: str | None
     scores: dict[str, float]
+    score_analysis: dict[str, str] | None = None
 
 
 class TrustScoreRow(BaseModel):
@@ -63,6 +64,7 @@ class TrustScoreRow(BaseModel):
     response_speed_score: Decimal
     quote_completeness: Decimal
     referral_score: Decimal
+    score_analysis: dict[str, str] | None = None
     computed_at: datetime
 
 

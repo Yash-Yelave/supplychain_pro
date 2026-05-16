@@ -49,6 +49,7 @@ def scoring_agent(state: ProcurementState, *, db: Session, weights: TrustScoreWe
             referral_score=row["referral_score"],
             composite_score=row["composite_score"],
             weights_used=row["weights_used"],
+            score_analysis=row["score_analysis"],
         )
         state.trust_scores.append(
             TrustScoreBreakdown(
@@ -60,6 +61,7 @@ def scoring_agent(state: ProcurementState, *, db: Session, weights: TrustScoreWe
                 referral_score=row["referral_score"],
                 composite_score=row["composite_score"],
                 weights_used=row["weights_used"],
+                score_analysis=row["score_analysis"],
             )
         )
 
