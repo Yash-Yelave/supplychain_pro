@@ -96,6 +96,15 @@ export interface ProcurementResultsResponse {
   analyst_summary: string | null;
 }
 
+export interface SupplierDirectoryItem {
+  id: string;
+  name: string;
+  email: string;
+  city: string;
+  country_code: string;
+  material_categories: string[];
+}
+
 export const procurementApi = {
   createRequest: async (data: ProcurementRequestCreate) => {
     try {
@@ -139,6 +148,27 @@ export const procurementApi = {
       return response.data;
     } catch (error) {
       console.error('Failed to get materials', error);
+      throw error;
+    }
+  },
+};
+
+export const suppliersApi = {
+  getAll: async (): Promise<SupplierDirectoryItem[]> => {
+    try {
+      const response = await apiClient.get<SupplierDirectoryItem[]>('/suppliers/');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to get suppliers', error);
+      throw error;
+    }
+  },
+  getById: async (id: string): Promise<SupplierDirectoryItem> => {
+    try {
+      const response = await apiClient.get<SupplierDirectoryItem>(`/suppliers/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get supplier ${id}`, error);
       throw error;
     }
   },
